@@ -1,12 +1,12 @@
 <template>
   <aside class="detail-panel" :class="{ expanded, collapsed: !expanded }">
-    <!-- Peek-вкладка: тільки на мобілі у згорнутому стані -->
+    <!-- Peek-вкладка: тільки на мобілі. Стрілка показує напрямок дії -->
     <button class="peek-tab" @click="$emit('toggle-expand')">
       <span class="grip-bar"></span>
       <span class="tier-dot-peek" :style="{ background: tierMeta[village.tier].dotColor }"></span>
       <strong class="peek-title">{{ village.name }}</strong>
       <span class="peek-region">· {{ village.region }}</span>
-      <Icon name="chevronUp" :size="18" class="peek-chev" />
+      <Icon :name="expanded ? 'chevronDown' : 'chevronUp'" :size="18" class="peek-chev" />
     </button>
 
     <header class="sticky-head">

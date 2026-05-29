@@ -37,7 +37,7 @@ export async function fetchLodging(lat, lng, radiusM = 8000) {
     });
     if (!res.ok) throw new Error('Overpass ' + res.status);
     const json = await res.json();
-    return (json.elements || [])
+    const items = (json.elements || [])
       .map(el => {
         const t = el.tags || {};
         return {
@@ -46,6 +46,7 @@ export async function fetchLodging(lat, lng, radiusM = 8000) {
           kind: t.tourism,
           title: t.name || t['name:uk'] || t['name:en'],
           phone: t.phone || t['contact:phone'],
+          email: t.email || t['contact:email'],
           website: t.website || t['contact:website'] || t.url,
           stars: t.stars,
           addr: [t['addr:street'], t['addr:housenumber']].filter(Boolean).join(' '),
@@ -54,6 +55,12 @@ export async function fetchLodging(lat, lng, radiusM = 8000) {
         };
       })
       .filter(it => it.title && it.lat && it.lng);
+    items.forEach(it => {
+      it._dist = haversineKm(lat, lng, it.lat, it.lng);
+      it._score = scoreLodging(it);
+    });
+    items.sort((a, b) => (b._score - a._score) || (a._dist - b._dist));
+    return items;
   });
 
   cache.set(key, result.value);
@@ -77,6 +84,63 @@ export const KIND_LABEL = {
 /**
  * Визначні місця в радіусі: гори, водоспади, замки, музеї, оглядові майданчики, печери.
  */
+/**
+ * Оцінка "цікавості" POI на основі сигналів з OSM.
+ * Wikipedia-стаття — найсильніший сигнал відомості.
+ */
+function scoreAttraction(item) {
+  let s = 0;
+  if (item.wikipedia) s += 30;
+  if (item.wikidata) s += 20;
+  if (item.website) s += 10;
+  if (item.image) s += 8;
+  s += (item.langCount || 0) * 3;  // багатомовність = відомість
+
+  const kindWeights = {
+    waterfall: 22, lake: 20, peak: 18, cave: 15,
+    castle: 28, monastery: 22, museum: 20,
+    viewpoint: 14, artwork: 10, church: 8,
+    ruins: 12, monument: 10, shrine: 4,
+    attraction: 12, landmark: 6
+  };
+  s += kindWeights[item.kind] || 5;
+
+  // Бонус за висоту (іменовані вершини)
+  if (item.kind === 'peak' && item.ele) {
+    const e = parseInt(item.ele);
+    if (e > 1500) s += 8;
+    if (e > 1800) s += 8;
+    if (e > 2000) s += 10;
+  }
+
+  // Штраф за відстань (далі — менш привабливо)
+  s -= (item._dist || 0) * 0.7;
+
+  return s;
+}
+
+/**
+ * Оцінка якості житла на основі тегів OSM.
+ */
+function scoreLodging(item) {
+  let s = 0;
+  if (item.stars) s += parseInt(item.stars) * 10;   // 5 зірок = +50
+  if (item.website) s += 12;
+  if (item.phone) s += 10;
+  if (item.addr) s += 4;
+  if (item.email) s += 4;
+
+  const kindWeights = {
+    hotel: 18, alpine_hut: 14, chalet: 12,
+    guest_house: 10, apartment: 7, motel: 5,
+    hostel: 5, camp_site: 4
+  };
+  s += kindWeights[item.kind] || 5;
+
+  s -= (item._dist || 0) * 0.5;
+  return s;
+}
+
 export async function fetchAttractions(lat, lng, radiusM = 15000) {
   const key = `attr:${lat.toFixed(3)},${lng.toFixed(3)},${radiusM}`;
   if (cache.has(key)) return cache.get(key);
@@ -108,13 +172,18 @@ export async function fetchAttractions(lat, lng, radiusM = 15000) {
       .map(el => {
         const t = el.tags || {};
         const kind = extractKind(t);
+        // Скільки мовних варіантів назви — індикатор відомості
+        const langCount = Object.keys(t).filter(k => k.startsWith('name:')).length;
         return {
           id: 'osm-' + el.id,
           name: t.name || t['name:uk'] || t['name:en'],
           kind,
           ele: t.ele,
           wikipedia: t.wikipedia || t['wikipedia:uk'],
+          wikidata: t.wikidata,
           website: t.website || t['contact:website'],
+          image: t.image,
+          langCount,
           lat: el.lat || (el.center && el.center.lat),
           lng: el.lon || (el.center && el.center.lon),
           source: 'osm'
@@ -123,8 +192,12 @@ export async function fetchAttractions(lat, lng, radiusM = 15000) {
       .filter(it => it.name && it.lat && it.lng);
 
     const unique = dedupeByName(items);
-    unique.forEach(it => { it._dist = haversineKm(lat, lng, it.lat, it.lng); });
-    unique.sort((a, b) => a._dist - b._dist);
+    unique.forEach(it => {
+      it._dist = haversineKm(lat, lng, it.lat, it.lng);
+      it._score = scoreAttraction(it);
+    });
+    // Сортуємо за рейтингом цікавості (топ — найкращі), потім за відстанню
+    unique.sort((a, b) => (b._score - a._score) || (a._dist - b._dist));
     return unique;
   });
 
