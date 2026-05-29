@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "Carpathians & Zakarpattia travel planner with Google Maps",
-  "homepage": "https://stylenova.github.io/Crypts",
+  "homepage": "https://stylenova.github.io/uit--rypts",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
