@@ -308,15 +308,15 @@ export default {
   background: #1f6f3f;
   color: #fff;
   border-radius: 28px;
-  padding: 12px 18px;
+  padding: 14px 22px;
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.35), 0 0 0 4px rgba(255,255,255,0.6);
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  bottom: 22px;
+  bottom: calc(24px + env(safe-area-inset-bottom, 0));
   right: 22px;
   transition: opacity 0.2s, transform 0.2s;
 }
@@ -434,8 +434,15 @@ export default {
   .logo-text { display: none; }
   .ctx-breadcrumb { font-size: 12px; gap: 3px; }
   .ctx-breadcrumb strong { font-size: 13px; }
-  .fab-list { bottom: 16px; right: 16px; padding: 12px 16px; }
+  .fab-list {
+    bottom: calc(80px + env(safe-area-inset-bottom, 0));
+    right: 16px;
+    padding: 0;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    justify-content: center;
+  }
   .fab-list span { display: none; }
-  .fab-list { border-radius: 50%; width: 56px; height: 56px; justify-content: center; }
 }
 </style>

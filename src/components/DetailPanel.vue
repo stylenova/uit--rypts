@@ -1059,67 +1059,78 @@ h3 .src-tag {
     width: 100vw; max-width: none;
     height: 90vh;
     border-left: none;
-    border-top: 2px solid #1f6f3f;
-    border-radius: 16px 16px 0 0;
-    box-shadow: 0 -10px 28px rgba(0,0,0,0.25);
+    border-top: none;
+    border-radius: 18px 18px 0 0;
+    box-shadow: 0 -12px 32px rgba(0,0,0,0.28);
     transition: height 0.28s cubic-bezier(0.32, 0.72, 0.2, 1);
+    padding-bottom: env(safe-area-inset-bottom, 0);
   }
-  /* Згорнутий стан — peek-вкладка ~64px */
-  .detail-panel.collapsed { height: 64px; overflow: hidden; }
+  /* Згорнутий стан — велика peek-вкладка, видима поверх системного бару */
+  .detail-panel.collapsed {
+    height: calc(96px + env(safe-area-inset-bottom, 0));
+    overflow: hidden;
+  }
 
-  /* Peek-вкладка видима тільки на мобілі */
+  /* Peek-вкладка — повноцінна кнопка, видима тільки на мобілі */
   .peek-tab {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     width: 100%;
     border: none;
     background: #fff;
     cursor: pointer;
-    padding: 8px 14px 10px;
+    padding: 18px 18px 16px;
     flex-shrink: 0;
     border-bottom: 1px solid #ece8de;
     position: relative;
+    min-height: 88px;
   }
-  .peek-tab .grip-bar {
+  .peek-tab::before {
+    content: '';
     position: absolute;
-    top: 6px;
+    top: 8px;
     left: 50%;
     transform: translateX(-50%);
-    width: 44px;
+    width: 48px;
     height: 5px;
     background: #c4beaf;
     border-radius: 3px;
   }
+  .peek-tab .grip-bar { display: none; }
   .tier-dot-peek {
     display: inline-block;
-    width: 10px;
-    height: 10px;
+    width: 14px;
+    height: 14px;
     border-radius: 50%;
     flex-shrink: 0;
-    margin-top: 8px;
+    box-shadow: 0 0 0 3px rgba(0,0,0,0.06);
   }
   .peek-title {
-    font-size: 16px;
-    font-weight: 700;
-    color: #2d2a24;
+    font-size: 18px;
+    font-weight: 800;
+    color: #1a1814;
     flex: 1;
     text-align: left;
-    margin-top: 6px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    letter-spacing: -0.2px;
   }
   .peek-region {
     font-size: 12px;
     color: #7a7363;
-    margin-top: 6px;
     flex-shrink: 0;
   }
   .peek-chev {
-    color: #1f6f3f;
-    margin-top: 6px;
+    color: #fff;
+    background: #1f6f3f;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    padding: 6px;
     flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(31, 111, 63, 0.35);
   }
 
   /* Sticky-head і scroller сховані у згорнутому стані */
