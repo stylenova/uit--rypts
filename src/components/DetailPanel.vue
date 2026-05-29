@@ -1,7 +1,16 @@
 <template>
-  <aside class="detail-panel" :class="{ expanded }">
+  <aside class="detail-panel" :class="{ expanded, collapsed: !expanded }">
+    <!-- Peek-вкладка: тільки на мобілі у згорнутому стані -->
+    <button class="peek-tab" @click="$emit('toggle-expand')">
+      <span class="grip-bar"></span>
+      <span class="tier-dot-peek" :style="{ background: tierMeta[village.tier].dotColor }"></span>
+      <strong class="peek-title">{{ village.name }}</strong>
+      <span class="peek-region">· {{ village.region }}</span>
+      <Icon name="chevronUp" :size="18" class="peek-chev" />
+    </button>
+
     <header class="sticky-head">
-      <button class="grip-mobile" @click="$emit('toggle-expand')" title="Розгорнути / згорнути">
+      <button class="grip-mobile" @click="$emit('toggle-expand')" title="Згорнути">
         <span class="grip-bar"></span>
       </button>
       <div class="head-row">
@@ -1040,24 +1049,86 @@ h3 .src-tag {
   align-items: flex-start;
 }
 
+/* === Peek-вкладка прихована на desktop === */
+.peek-tab { display: none; }
+.tier-dot-peek { display: none; }
+
 @media (max-width: 720px) {
   .detail-panel {
     top: auto; left: 0; right: 0; bottom: 0;
     width: 100vw; max-width: none;
-    height: 50vh;
+    height: 90vh;
     border-left: none;
     border-top: 2px solid #1f6f3f;
     border-radius: 16px 16px 0 0;
     box-shadow: 0 -10px 28px rgba(0,0,0,0.25);
-    transition: height 0.25s ease;
+    transition: height 0.28s cubic-bezier(0.32, 0.72, 0.2, 1);
   }
-  .detail-panel.expanded { height: 90vh; }
-  .grip-mobile {
-    display: flex; justify-content: center; align-items: center;
-    height: 22px; background: transparent; border: none;
-    cursor: pointer; padding: 0; margin-bottom: 4px;
+  /* Згорнутий стан — peek-вкладка ~64px */
+  .detail-panel.collapsed { height: 64px; overflow: hidden; }
+
+  /* Peek-вкладка видима тільки на мобілі */
+  .peek-tab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    border: none;
+    background: #fff;
+    cursor: pointer;
+    padding: 8px 14px 10px;
+    flex-shrink: 0;
+    border-bottom: 1px solid #ece8de;
+    position: relative;
   }
-  .grip-bar { width: 44px; height: 5px; background: #c4beaf; border-radius: 3px; }
+  .peek-tab .grip-bar {
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 44px;
+    height: 5px;
+    background: #c4beaf;
+    border-radius: 3px;
+  }
+  .tier-dot-peek {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 8px;
+  }
+  .peek-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #2d2a24;
+    flex: 1;
+    text-align: left;
+    margin-top: 6px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .peek-region {
+    font-size: 12px;
+    color: #7a7363;
+    margin-top: 6px;
+    flex-shrink: 0;
+  }
+  .peek-chev {
+    color: #1f6f3f;
+    margin-top: 6px;
+    flex-shrink: 0;
+  }
+
+  /* Sticky-head і scroller сховані у згорнутому стані */
+  .detail-panel.collapsed .sticky-head,
+  .detail-panel.collapsed .scroller { display: none; }
+
+  /* Звичайний sticky-head: ховаємо grip коли peek є */
+  .grip-mobile { display: none; }
+
   .scroller { padding-bottom: 80px; }
 }
 </style>

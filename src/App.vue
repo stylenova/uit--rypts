@@ -9,6 +9,7 @@
       :visible-attractions="visibleAttractions"
       :visible-lodging="visibleLodging"
       @select="onSelect"
+      @map-interaction="onMapInteraction"
     />
 
     <!-- Top bar — постійно бачимо назву додатку та контекст -->
@@ -33,8 +34,9 @@
       </button>
     </header>
 
-    <!-- Floating list button (mobile-only) -->
-    <button class="fab-list" @click="drawerOpen = true" :class="{ hidden: drawerOpen }">
+    <!-- Floating list button -->
+    <button class="fab-list" @click="drawerOpen = true"
+            :class="{ hidden: drawerOpen || (selectedVillage && detailExpanded) }">
       <Icon name="list" :size="20" />
       <span>Сёла ({{ villages.length }})</span>
     </button>
@@ -143,12 +145,16 @@ export default {
   methods: {
     onSelect(id) {
       this.selectedId = id;
-      this.detailExpanded = false;
+      this.detailExpanded = true;   // одразу розгорнуто на 90%
     },
     onSelectFromDrawer(id) {
       this.selectedId = id;
-      this.detailExpanded = false;
+      this.detailExpanded = true;
       this.drawerOpen = false;
+    },
+    onMapInteraction() {
+      // Клік / drag по карті — згортаємо панель у peek-вкладку
+      if (this.selectedVillage) this.detailExpanded = false;
     },
     openDrawer(tab) {
       this.tab = tab;
@@ -180,6 +186,7 @@ export default {
     },
     onRouteRequest({ highlight, mode }) {
       this.routeRequest = { highlight, mode, ts: Date.now() };
+      this.detailExpanded = false;  // показуємо маршрут — згортаємо панель
     },
     onVisibleUpdate({ attractions, lodging }) {
       this.visibleAttractions = attractions;

@@ -5,7 +5,7 @@
 <script>
 import {
   // navigation / ui
-  X, ChevronLeft, ChevronRight, Menu, Star, Bookmark, BookmarkPlus,
+  X, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Menu, Star, Bookmark, BookmarkPlus,
   ArrowLeft, ArrowUpRight, ExternalLink, Search, Filter, Info,
   AlertTriangle, Loader2, MapPin, Map as MapIcon, Compass, List,
   // POI types
@@ -21,7 +21,9 @@ import {
 
 const MAP = {
   // nav/ui
-  x: X, back: ArrowLeft, chevronLeft: ChevronLeft, chevronRight: ChevronRight,
+  x: X, back: ArrowLeft,
+  chevronLeft: ChevronLeft, chevronRight: ChevronRight,
+  chevronUp: ChevronUp, chevronDown: ChevronDown,
   menu: Menu, star: Star, bookmark: Bookmark, bookmarkPlus: BookmarkPlus,
   externalLink: ExternalLink, arrowUpRight: ArrowUpRight, search: Search,
   filter: Filter, info: Info, warn: AlertTriangle, loader: Loader2,

@@ -66,7 +66,7 @@ export default {
     visibleAttractions: { type: Array, default: () => [] },
     visibleLodging: { type: Array, default: () => [] }
   },
-  emits: ['select'],
+  emits: ['select', 'map-interaction'],
   data() {
     return {
       userLatLng: null,
@@ -125,7 +125,15 @@ export default {
 
       if (this.selected) {
         this.map.setView([this.selected.lat, this.selected.lng], 12);
+      } else {
+        // При першому відкритті — підлаштовуємо межі під усі села
+        const bounds = L.latLngBounds(this.villages.map(v => [v.lat, v.lng]));
+        this.map.fitBounds(bounds, { padding: [40, 40] });
       }
+
+      // Тап / drag по карті — згортаємо bottom-sheet (UX мобільного)
+      this.map.on('click', () => this.$emit('map-interaction'));
+      this.map.on('dragstart', () => this.$emit('map-interaction'));
     },
 
     renderVillageMarkers() {
