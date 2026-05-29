@@ -73,25 +73,6 @@
         </div>
 
         <div v-if="osmAttractions.length">
-          <!-- Швидкі пресети -->
-          <div class="filter-block">
-            <div class="filter-label">Швидко</div>
-            <div class="kind-filters">
-              <button
-                :class="['kind-chip preset', { active: !selectedAttrKinds.length && attrTop === 3 }]"
-                @click="quickPresetAttr(3)"
-              >Топ-3</button>
-              <button
-                :class="['kind-chip preset', { active: !selectedAttrKinds.length && attrTop === 10 }]"
-                @click="quickPresetAttr(10)"
-              >Топ-10</button>
-              <button
-                :class="['kind-chip preset', { active: !selectedAttrKinds.length && attrTop === -1 }]"
-                @click="quickPresetAttr(-1)"
-              >Усі ({{ osmAttractions.length }})</button>
-            </div>
-          </div>
-
           <!-- Фільтри типів — multi-select -->
           <div v-if="attractionKinds.length > 1" class="filter-block">
             <div class="filter-label">Тип ({{ selectedAttrKinds.length || 'усі' }})</div>
@@ -116,15 +97,21 @@
             </div>
           </div>
 
-          <!-- Скільки показати у списку (на карті — усі відфільтровані) -->
+          <!-- Скільки показати: топ за рейтингом -->
           <div class="top-toggle">
-            <span class="filter-label">У списку</span>
+            <span class="filter-label">Показати</span>
             <button
-              v-for="n in [3, 10, -1]"
-              :key="n"
-              :class="['top-chip', { active: attrTop === n }]"
-              @click="attrTop = n"
-            >{{ n === -1 ? 'Усі' : n }}</button>
+              :class="['top-chip', { active: attrTop === 3 }]"
+              @click="attrTop = 3"
+            >Топ-3</button>
+            <button
+              :class="['top-chip', { active: attrTop === 10 }]"
+              @click="attrTop = 10"
+            >Топ-10</button>
+            <button
+              :class="['top-chip', { active: attrTop === -1 }]"
+              @click="attrTop = -1"
+            >Усі</button>
             <span class="counter">{{ displayedAttractions.length }} / {{ filteredAttractions.length }}</span>
           </div>
 
@@ -197,24 +184,6 @@
         </div>
 
         <div v-if="osmLodging.length">
-          <div class="filter-block">
-            <div class="filter-label">Швидко</div>
-            <div class="kind-filters">
-              <button
-                :class="['kind-chip preset', { active: !selectedLodgingKinds.length && lodgingTop === 3 }]"
-                @click="quickPresetLodging(3)"
-              >Топ-3</button>
-              <button
-                :class="['kind-chip preset', { active: !selectedLodgingKinds.length && lodgingTop === 10 }]"
-                @click="quickPresetLodging(10)"
-              >Топ-10</button>
-              <button
-                :class="['kind-chip preset', { active: !selectedLodgingKinds.length && lodgingTop === -1 }]"
-                @click="quickPresetLodging(-1)"
-              >Усі ({{ osmLodging.length }})</button>
-            </div>
-          </div>
-
           <div v-if="lodgingKinds.length > 1" class="filter-block">
             <div class="filter-label">Тип ({{ selectedLodgingKinds.length || 'усі' }})</div>
             <div class="kind-filters">
@@ -239,13 +208,19 @@
           </div>
 
           <div class="top-toggle">
-            <span class="filter-label">У списку</span>
+            <span class="filter-label">Показати</span>
             <button
-              v-for="n in [3, 10, -1]"
-              :key="n"
-              :class="['top-chip', { active: lodgingTop === n }]"
-              @click="lodgingTop = n"
-            >{{ n === -1 ? 'Усі' : n }}</button>
+              :class="['top-chip', { active: lodgingTop === 3 }]"
+              @click="lodgingTop = 3"
+            >Топ-3</button>
+            <button
+              :class="['top-chip', { active: lodgingTop === 10 }]"
+              @click="lodgingTop = 10"
+            >Топ-10</button>
+            <button
+              :class="['top-chip', { active: lodgingTop === -1 }]"
+              @click="lodgingTop = -1"
+            >Усі</button>
             <span class="counter">{{ displayedLodging.length }} / {{ filteredLodging.length }}</span>
           </div>
 
@@ -338,11 +313,17 @@
           <div class="top-toggle">
             <span class="filter-label">У кожній групі</span>
             <button
-              v-for="n in [3, 10, -1]"
-              :key="n"
-              :class="['top-chip', { active: transportTop === n }]"
-              @click="transportTop = n"
-            >{{ n === -1 ? 'Усі' : n }}</button>
+              :class="['top-chip', { active: transportTop === 3 }]"
+              @click="transportTop = 3"
+            >Топ-3</button>
+            <button
+              :class="['top-chip', { active: transportTop === 10 }]"
+              @click="transportTop = 10"
+            >Топ-10</button>
+            <button
+              :class="['top-chip', { active: transportTop === -1 }]"
+              @click="transportTop = -1"
+            >Усі</button>
           </div>
 
           <!-- Розбивка по типах: вокзали / автостанції / аеропорти -->
@@ -578,14 +559,6 @@ export default {
       });
     },
     transportLabel(k) { return TRANSPORT_LABEL[k] || 'Зупинка'; },
-    quickPresetAttr(n) {
-      this.selectedAttrKinds = [];
-      this.attrTop = n;
-    },
-    quickPresetLodging(n) {
-      this.selectedLodgingKinds = [];
-      this.lodgingTop = n;
-    },
     toggleAttrKind(k) {
       this.selectedAttrKinds = this.selectedAttrKinds.includes(k)
         ? this.selectedAttrKinds.filter(x => x !== k)
