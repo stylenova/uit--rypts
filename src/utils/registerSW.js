@@ -1,42 +1,61 @@
 /**
- * Реєстрація Service Worker. Викликаємо в main.js.
+ * Реєстрація Service Worker з автоматичним оновленням.
+ *
+ * При кожному деплої URL SW включає timestamp (v=...).
+ * Браузер бачить новий URL → завантажує нову версію SW → очищає старий кеш.
  */
 
 export function registerServiceWorker() {
   if (!('serviceWorker' in navigator)) return;
 
-  // У dev-режимі SW не реєструємо — він кешує JS і ламає HMR
   if (process.env.NODE_ENV !== 'production') {
-    // Якщо раніше зареєстрували — прибираємо
-    navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(r => r.unregister());
-    });
+    // В dev — знімаємо SW щоб не заважав HMR
+    navigator.serviceWorker.getRegistrations()
+      .then(regs => regs.forEach(r => r.unregister()))
+      .catch(() => {});
     return;
   }
 
-  if (location.hostname !== 'localhost' && location.protocol !== 'https:') return;
-
   window.addEventListener('load', () => {
-    const swUrl = `${process.env.BASE_URL || '/'}service-worker.js`;
-    navigator.serviceWorker.register(swUrl).catch(err => {
-      console.warn('SW registration failed:', err);
+    // Передаємо унікальну версію в URL — браузер завжди бачить «новий» SW
+    const version = (typeof __APP_VERSION__ !== 'undefined')
+      ? __APP_VERSION__
+      : Date.now();
+    const swUrl = `${process.env.BASE_URL || '/'}service-worker.js?v=${version}`;
+
+    navigator.serviceWorker.register(swUrl).then(reg => {
+      // Коли новий SW встановився — одразу оновлюємо сторінку
+      reg.addEventListener('updatefound', () => {
+        const newWorker = reg.installing;
+        if (!newWorker) return;
+        newWorker.addEventListener('statechange', () => {
+          if (newWorker.state === 'activated') {
+            // Тихо перезавантажуємо щоб показати нову версію
+            window.location.reload();
+          }
+        });
+      });
+    }).catch(err => console.warn('SW registration failed:', err));
+
+    // Якщо контролер змінився (інший вхід) — теж оновлюємо
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!refreshing) {
+        refreshing = true;
+        window.location.reload();
+      }
     });
   });
 }
 
-/**
- * Прогрів тайлів OSM для певного квадрата (попередньо завантажуємо у кеш).
- * Викликаємо при «Зберегти офлайн».
- */
 export function prefetchTiles(latC, lngC, zoomLevels = [10, 11, 12, 13]) {
   if (!('serviceWorker' in navigator) || !navigator.serviceWorker.controller) return;
 
   const urls = [];
   for (const z of zoomLevels) {
-    // Тайл-координати центру
     const x = lon2tile(lngC, z);
     const y = lat2tile(latC, z);
-    const r = z >= 13 ? 2 : 1;  // радіус у тайлах
+    const r = z >= 13 ? 2 : 1;
     for (let dx = -r; dx <= r; dx++) {
       for (let dy = -r; dy <= r; dy++) {
         const tx = x + dx, ty = y + dy;
