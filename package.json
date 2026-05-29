@@ -1,0 +1,22 @@
+{
+  "name": "crypts",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Carpathians & Zakarpattia travel planner with Google Maps",
+  "homepage": "https://stylenova.github.io/Crypts",
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "test": "node --test tests/*.test.mjs",
+    "deploy": "gh-pages -d dist"
+  },
+  "dependencies": {
+    "@lucide/vue": "^1.17.0",
+    "leaflet": "^1.9.4",
+    "vue": "^3.4.0"
+  },
+  "devDependencies": {
+    "@vue/cli-service": "^5.0.0",
+    "gh-pages": "^6.3.0"
+  }
+}
