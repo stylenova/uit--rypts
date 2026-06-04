@@ -1,0 +1,65 @@
+name: Build APK for Android
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:  # можна запустити вручну
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Vue app
+        run: npm run build
+
+      - name: Copy web assets to Android
+        run: npx cap copy android
+
+      - name: Build APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleRelease
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: crypts-release
+          path: android/app/release/app-release.apk
+          retention-days: 30
+
+      - name: Create Release
+        if: success()
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: release-${{ github.run_number }}
+          files: android/app/release/app-release.apk
+          body: |
+            🚀 Crypts Android APK build #${{ github.run_number }}
+
+            **Скачай APK і встанови на телефон:**
+            1. Натисни на app-release.apk
+            2. Передай на телефон (Google Drive, email, USB)
+            3. Відкрий на телефоні → Install
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
