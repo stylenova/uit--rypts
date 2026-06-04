@@ -1,0 +1,8 @@
+{
+  "appId": "com.stylenova.crypts",
+  "appName": "Crypts",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  }
+}
